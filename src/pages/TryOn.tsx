@@ -6,19 +6,31 @@ import { MeasurementsStep } from '@/components/tryon/MeasurementsStep';
 import { SareeSelectionStep } from '@/components/tryon/SareeSelectionStep';
 import { ProcessingStep } from '@/components/tryon/ProcessingStep';
 import { ResultStep } from '@/components/tryon/ResultStep';
-import { Measurements, DrapingStyle } from '@/types/tryon';
+import { Measurements, DrapingStyle, PoseData } from '@/types/tryon';
 
 type Step = 'upload' | 'measurements' | 'saree-selection' | 'processing' | 'result';
 
 const TryOn = () => {
   const [currentStep, setCurrentStep] = useState<Step>('upload');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [poseData, setPoseData] = useState<PoseData | null>(null);
   const [measurements, setMeasurements] = useState<Measurements | null>(null);
   const [selectedSareeId, setSelectedSareeId] = useState<string | null>(null);
   const [selectedDrapingStyle, setSelectedDrapingStyle] = useState<DrapingStyle>('nivi');
 
-  const handleImageUpload = (imageUrl: string) => {
+  const handleImageUpload = (imageUrl: string, detectedPose?: PoseData) => {
     setUploadedImage(imageUrl);
+    if (detectedPose) {
+      setPoseData(detectedPose);
+      // Pre-fill measurements from pose detection
+      setMeasurements({
+        height: 165, // Default, can be adjusted
+        bust: 90, // Default
+        waist: detectedPose.estimatedMeasurements.hipWidth * 0.8,
+        hips: detectedPose.estimatedMeasurements.hipWidth,
+        shoulderWidth: detectedPose.estimatedMeasurements.shoulderWidth,
+      });
+    }
     setCurrentStep('measurements');
   };
 
@@ -40,6 +52,7 @@ const TryOn = () => {
   const handleStartOver = () => {
     setCurrentStep('upload');
     setUploadedImage(null);
+    setPoseData(null);
     setMeasurements(null);
     setSelectedSareeId(null);
   };
@@ -53,6 +66,8 @@ const TryOn = () => {
           <MeasurementsStep 
             onSubmit={handleMeasurementsSubmit}
             onBack={() => setCurrentStep('upload')}
+            initialMeasurements={measurements || undefined}
+            poseData={poseData || undefined}
           />
         );
       case 'saree-selection':
@@ -69,6 +84,7 @@ const TryOn = () => {
             sareeId={selectedSareeId!}
             drapingStyle={selectedDrapingStyle}
             measurements={measurements || undefined}
+            poseData={poseData || undefined}
           />
         );
       case 'result':
@@ -78,6 +94,7 @@ const TryOn = () => {
             sareeId={selectedSareeId!}
             drapingStyle={selectedDrapingStyle}
             measurements={measurements || undefined}
+            poseData={poseData || undefined}
             onStartOver={handleStartOver}
           />
         );

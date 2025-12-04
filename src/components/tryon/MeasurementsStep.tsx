@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, ArrowRight, Ruler, Sparkles, Info } from 'lucide-react';
-import { Measurements } from '@/types/tryon';
+import { ArrowLeft, ArrowRight, Ruler, Sparkles, Info, CheckCircle } from 'lucide-react';
+import { Measurements, PoseData } from '@/types/tryon';
 
 interface MeasurementsStepProps {
   onSubmit: (measurements: Measurements) => void;
   onBack: () => void;
+  initialMeasurements?: Measurements;
+  poseData?: PoseData;
 }
 
-export function MeasurementsStep({ onSubmit, onBack }: MeasurementsStepProps) {
-  const [measurements, setMeasurements] = useState<Measurements>({
+export function MeasurementsStep({ onSubmit, onBack, initialMeasurements, poseData }: MeasurementsStepProps) {
+  const [measurements, setMeasurements] = useState<Measurements>(initialMeasurements || {
     height: 160,
     bust: 86,
     waist: 71,
@@ -20,28 +22,21 @@ export function MeasurementsStep({ onSubmit, onBack }: MeasurementsStepProps) {
     shoulderWidth: 40
   });
 
-  const [useAuto, setUseAuto] = useState(false);
+  const [aiDetected, setAiDetected] = useState(!!poseData);
+
+  // Update measurements when pose data changes
+  useEffect(() => {
+    if (initialMeasurements) {
+      setMeasurements(initialMeasurements);
+    }
+  }, [initialMeasurements]);
 
   const handleChange = (field: keyof Measurements, value: string) => {
     setMeasurements(prev => ({
       ...prev,
       [field]: parseFloat(value) || 0
     }));
-  };
-
-  const handleAutoDetect = () => {
-    setUseAuto(true);
-    // Simulate AI detection with random realistic values
-    setTimeout(() => {
-      setMeasurements({
-        height: 162,
-        bust: 88,
-        waist: 72,
-        hips: 98,
-        shoulderWidth: 41
-      });
-      setUseAuto(false);
-    }, 1500);
+    setAiDetected(false);
   };
 
   const measurementFields = [
@@ -66,7 +61,9 @@ export function MeasurementsStep({ onSubmit, onBack }: MeasurementsStepProps) {
               Body Measurements
             </h1>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Enter your measurements for a perfectly fitted 3D avatar, or let our AI detect them automatically
+              {poseData 
+                ? 'Measurements pre-filled from AI pose detection. Adjust if needed.'
+                : 'Enter your measurements for a perfectly fitted 3D avatar'}
             </p>
           </div>
 
@@ -75,33 +72,21 @@ export function MeasurementsStep({ onSubmit, onBack }: MeasurementsStepProps) {
             <div className="lg:col-span-2">
               <Card variant="gold">
                 <CardContent className="p-6">
-                  {/* Auto-detect button */}
-                  <Button 
-                    variant="maroon" 
-                    className="w-full mb-6"
-                    onClick={handleAutoDetect}
-                    disabled={useAuto}
-                  >
-                    {useAuto ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
-                        AI Analyzing Your Photo...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5" />
-                        Auto-Detect from Photo
-                      </>
-                    )}
-                  </Button>
+                  {/* AI Detection Status */}
+                  {poseData && (
+                    <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg mb-6">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <div>
+                        <p className="text-foreground font-medium text-sm">AI Pose Detection Applied</p>
+                        <p className="text-muted-foreground text-xs">
+                          {poseData.landmarks.length} landmarks detected • Shoulder: {poseData.estimatedMeasurements.shoulderWidth}cm
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-                  <div className="relative mb-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-card px-4 text-muted-foreground text-sm">or enter manually</span>
-                    </div>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Fine-tune your measurements below:
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
