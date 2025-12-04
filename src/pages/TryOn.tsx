@@ -68,6 +68,7 @@ const TryOn = () => {
             onComplete={handleProcessingComplete}
             sareeId={selectedSareeId!}
             drapingStyle={selectedDrapingStyle}
+            measurements={measurements || undefined}
           />
         );
       case 'result':
@@ -76,6 +77,7 @@ const TryOn = () => {
             uploadedImage={uploadedImage}
             sareeId={selectedSareeId!}
             drapingStyle={selectedDrapingStyle}
+            measurements={measurements || undefined}
             onStartOver={handleStartOver}
           />
         );

@@ -10,24 +10,26 @@ import {
   Sparkles,
   CheckCircle,
   Palette,
-  Ruler
+  Ruler,
+  RotateCw
 } from 'lucide-react';
-import { DrapingStyle } from '@/types/tryon';
+import { DrapingStyle, Measurements } from '@/types/tryon';
 import { sarees, drapingStyles } from '@/data/sarees';
+import { TryOnScene } from './TryOnScene';
 
 interface ResultStepProps {
   uploadedImage: string | null;
   sareeId: string;
   drapingStyle: DrapingStyle;
+  measurements?: Measurements;
   onStartOver: () => void;
 }
 
-export function ResultStep({ uploadedImage, sareeId, drapingStyle, onStartOver }: ResultStepProps) {
+export function ResultStep({ uploadedImage, sareeId, drapingStyle, measurements, onStartOver }: ResultStepProps) {
   const [liked, setLiked] = useState(false);
   
   const saree = sarees.find(s => s.id === sareeId);
   const style = drapingStyles.find(s => s.id === drapingStyle);
-
   const accuracyMetrics = [
     { label: 'Body Alignment', value: '98.2%' },
     { label: 'Drape Realism', value: '96.7%' },
@@ -53,74 +55,48 @@ export function ResultStep({ uploadedImage, sareeId, drapingStyle, onStartOver }
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Result Image */}
             <div className="lg:col-span-2">
               <Card variant="gold" className="overflow-hidden">
                 <CardContent className="p-0">
-                  <div className="aspect-[3/4] relative overflow-hidden">
-                    {/* Show saree image as result */}
-                    {saree?.image && saree.image !== '/placeholder.svg' ? (
-                      <>
-                        <img 
-                          src={saree.image} 
-                          alt={`${saree.name} in ${style?.name}`}
-                          className="w-full h-full object-cover"
-                        />
-                        {/* Overlay with results info */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                        
-                        {/* Result badge */}
-                        <div className="absolute bottom-6 left-6 right-6 bg-card/90 backdrop-blur-md rounded-xl p-4">
-                          <div className="flex items-center gap-4">
-                            <Sparkles className="w-8 h-8 text-primary" />
-                            <div>
-                              <h3 className="font-display text-lg font-semibold text-foreground">
-                                {saree.name}
-                              </h3>
-                              <p className="text-muted-foreground text-sm">
-                                {style?.name} • {saree.fabricType}
-                              </p>
-                            </div>
-                            <p className="text-primary font-bold text-xl ml-auto">
-                              ₹{saree.price.toLocaleString()}
-                            </p>
-                          </div>
+                  <div className="aspect-[3/4] relative overflow-hidden bg-gradient-to-br from-background via-muted/10 to-background">
+                    {/* 3D Scene */}
+                    <TryOnScene
+                      sareeColor={saree?.color || '#8B0000'}
+                      drapingStyle={drapingStyle}
+                      measurements={measurements}
+                      progress={1}
+                      showAvatar={true}
+                      showSaree={true}
+                      interactive={true}
+                    />
+                    
+                    {/* Overlay with results info */}
+                    <div className="absolute bottom-6 left-6 right-6 bg-card/90 backdrop-blur-md rounded-xl p-4">
+                      <div className="flex items-center gap-4">
+                        <Sparkles className="w-8 h-8 text-primary" />
+                        <div>
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            {saree?.name}
+                          </h3>
+                          <p className="text-muted-foreground text-sm">
+                            {style?.name} • {saree?.fabricType}
+                          </p>
                         </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-maroon via-burgundy to-background flex items-center justify-center">
-                        <div className="text-center p-8 space-y-6">
-                          <div className="relative">
-                            <div 
-                              className="w-48 h-64 mx-auto rounded-2xl shadow-2xl relative overflow-hidden"
-                              style={{ backgroundColor: saree?.color }}
-                            >
-                              <div className="absolute inset-0 texture-silk opacity-40" />
-                              <div className="absolute inset-0 texture-zari" />
-                              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gold/40 to-transparent" />
-                            </div>
-                            <div className="absolute -top-4 -right-4 w-8 h-8 text-gold animate-pulse">
-                              <Sparkles className="w-full h-full" />
-                            </div>
-                          </div>
-                          <div className="bg-card/80 backdrop-blur-md rounded-xl p-4 max-w-sm mx-auto">
-                            <h3 className="font-display text-lg font-semibold text-foreground mb-1">
-                              {saree?.name}
-                            </h3>
-                            <p className="text-muted-foreground text-sm mb-2">
-                              {style?.name} • {saree?.fabricType}
-                            </p>
-                            <p className="text-primary font-bold text-xl">
-                              ₹{saree?.price.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
+                        <p className="text-primary font-bold text-xl ml-auto">
+                          ₹{saree?.price.toLocaleString()}
+                        </p>
                       </div>
-                    )}
+                    </div>
 
                     {/* Style badge */}
                     <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-md rounded-lg px-3 py-2">
                       <span className="text-sm font-medium text-primary">{style?.name}</span>
+                    </div>
+                    
+                    {/* Interaction hint */}
+                    <div className="absolute top-4 right-16 bg-card/80 backdrop-blur-md rounded-lg px-3 py-2 flex items-center gap-2">
+                      <RotateCw className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Drag to rotate</span>
                     </div>
 
                     {/* Like button */}
