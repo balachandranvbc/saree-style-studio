@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles, User, Layers, Palette, CheckCircle } from 'lucide-react';
-import { DrapingStyle, Measurements } from '@/types/tryon';
+import { DrapingStyle, Measurements, PoseData } from '@/types/tryon';
 import { sarees, drapingStyles } from '@/data/sarees';
 import { TryOnScene } from './TryOnScene';
 
@@ -11,6 +11,7 @@ interface ProcessingStepProps {
   sareeId: string;
   drapingStyle: DrapingStyle;
   measurements?: Measurements;
+  poseData?: PoseData;
 }
 
 const processingSteps = [
@@ -20,7 +21,7 @@ const processingSteps = [
   { id: 'render', label: 'Rendering Final Image', icon: Palette, duration: 1500 }
 ];
 
-export function ProcessingStep({ onComplete, sareeId, drapingStyle, measurements }: ProcessingStepProps) {
+export function ProcessingStep({ onComplete, sareeId, drapingStyle, measurements, poseData }: ProcessingStepProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [showAvatar, setShowAvatar] = useState(false);

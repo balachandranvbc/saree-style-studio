@@ -1,9 +1,30 @@
+import { PoseLandmark } from '@/lib/poseDetection';
+
 export interface Measurements {
   height: number;
   bust: number;
   waist: number;
   hips: number;
   shoulderWidth: number;
+}
+
+export interface PoseData {
+  landmarks: PoseLandmark[];
+  anchors: {
+    leftShoulder: { x: number; y: number };
+    rightShoulder: { x: number; y: number };
+    leftHip: { x: number; y: number };
+    rightHip: { x: number; y: number };
+    waistCenter: { x: number; y: number };
+    neckCenter: { x: number; y: number };
+  };
+  estimatedMeasurements: {
+    shoulderWidth: number;
+    torsoHeight: number;
+    hipWidth: number;
+    armLength: number;
+    legLength: number;
+  };
 }
 
 export interface Saree {

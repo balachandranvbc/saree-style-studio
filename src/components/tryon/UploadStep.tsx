@@ -1,16 +1,22 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Camera, Image, Sparkles, CheckCircle } from 'lucide-react';
+import { Upload, Camera, Image, Sparkles, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
+import { usePoseDetection } from '@/hooks/usePoseDetection';
+import { drawPoseLandmarks } from '@/lib/poseDetection';
+import { PoseData } from '@/types/tryon';
 
 interface UploadStepProps {
-  onImageUpload: (imageUrl: string) => void;
+  onImageUpload: (imageUrl: string, poseData?: PoseData) => void;
 }
 
 export function UploadStep({ onImageUpload }: UploadStepProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [poseData, setPoseData] = useState<PoseData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { isDetecting, error, detectFromImage } = usePoseDetection();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -39,16 +45,45 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
 
   const handleFile = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const result = e.target?.result as string;
       setPreview(result);
+      setPoseData(null);
+      
+      // Run pose detection
+      const detected = await detectFromImage(result);
+      if (detected) {
+        setPoseData({
+          landmarks: detected.landmarks,
+          anchors: detected.anchors,
+          estimatedMeasurements: detected.measurements,
+        });
+      }
     };
     reader.readAsDataURL(file);
   };
 
+  // Draw pose landmarks on canvas
+  useEffect(() => {
+    if (preview && poseData && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const img = new window.Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        drawPoseLandmarks(ctx, poseData.landmarks, img.width, img.height);
+      };
+      img.src = preview;
+    }
+  }, [preview, poseData]);
+
   const handleContinue = () => {
     if (preview) {
-      onImageUpload(preview);
+      onImageUpload(preview, poseData || undefined);
     }
   };
 
@@ -73,7 +108,7 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
               Upload Your Photo
             </h1>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Our AI will analyze your photo to create a precise 3D avatar for the virtual try-on
+              Our AI will analyze your photo using MediaPipe to detect your pose and create a precise 3D avatar
             </p>
           </div>
 
@@ -85,7 +120,7 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => !isDetecting && fileInputRef.current?.click()}
                   className={`
                     relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
                     transition-all duration-300 min-h-[300px] flex flex-col items-center justify-center
@@ -94,6 +129,7 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
                       : 'border-border hover:border-primary/50 hover:bg-muted/50'
                     }
                     ${preview ? 'border-solid border-primary' : ''}
+                    ${isDetecting ? 'pointer-events-none' : ''}
                   `}
                 >
                   <input
@@ -105,17 +141,54 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
                   />
 
                   {preview ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 w-full">
                       <div className="relative w-48 h-64 mx-auto rounded-lg overflow-hidden shadow-lg">
-                        <img 
-                          src={preview} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5 text-primary-foreground" />
-                        </div>
+                        {poseData ? (
+                          <canvas 
+                            ref={canvasRef}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <img 
+                            src={preview} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        
+                        {isDetecting && (
+                          <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center">
+                            <Loader2 className="w-8 h-8 text-primary animate-spin mb-2" />
+                            <span className="text-sm text-foreground font-medium">Detecting pose...</span>
+                          </div>
+                        )}
+                        
+                        {poseData && !isDetecting && (
+                          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                        )}
                       </div>
+                      
+                      {error && (
+                        <div className="flex items-center gap-2 text-destructive text-sm justify-center">
+                          <AlertCircle className="w-4 h-4" />
+                          {error}
+                        </div>
+                      )}
+                      
+                      {poseData && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                          <p className="text-foreground font-medium mb-2">✓ Pose Detected - {poseData.landmarks.length} landmarks</p>
+                          <div className="grid grid-cols-2 gap-2 text-muted-foreground text-xs">
+                            <span>Shoulder: ~{poseData.estimatedMeasurements.shoulderWidth}cm</span>
+                            <span>Torso: ~{poseData.estimatedMeasurements.torsoHeight}cm</span>
+                            <span>Hip: ~{poseData.estimatedMeasurements.hipWidth}cm</span>
+                            <span>Arm: ~{poseData.estimatedMeasurements.armLength}cm</span>
+                          </div>
+                        </div>
+                      )}
+                      
                       <p className="text-muted-foreground text-sm">Click to change photo</p>
                     </div>
                   ) : (
@@ -138,15 +211,16 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
                   )}
                 </div>
 
-                {preview && (
+                {preview && !isDetecting && (
                   <Button 
                     variant="gold" 
                     size="lg" 
                     className="w-full mt-6"
                     onClick={handleContinue}
+                    disabled={!poseData}
                   >
                     <Sparkles className="w-5 h-5" />
-                    Continue to Measurements
+                    {poseData ? 'Continue to Measurements' : 'Waiting for pose detection...'}
                   </Button>
                 )}
               </CardContent>
@@ -184,12 +258,12 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
                       <Image className="w-5 h-5 text-accent" />
                     </div>
                     <h3 className="font-display text-lg font-semibold text-foreground">
-                      Privacy First
+                      AI-Powered Detection
                     </h3>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    Your photos are processed securely and never stored on our servers. 
-                    All processing happens in real-time and data is deleted after your session.
+                    Using Google's MediaPipe Pose Landmarker to detect 33 body landmarks 
+                    for accurate 3D avatar generation. All processing happens in your browser.
                   </p>
                 </CardContent>
               </Card>

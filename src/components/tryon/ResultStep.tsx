@@ -13,7 +13,7 @@ import {
   Ruler,
   RotateCw
 } from 'lucide-react';
-import { DrapingStyle, Measurements } from '@/types/tryon';
+import { DrapingStyle, Measurements, PoseData } from '@/types/tryon';
 import { sarees, drapingStyles } from '@/data/sarees';
 import { TryOnScene } from './TryOnScene';
 
@@ -22,10 +22,11 @@ interface ResultStepProps {
   sareeId: string;
   drapingStyle: DrapingStyle;
   measurements?: Measurements;
+  poseData?: PoseData;
   onStartOver: () => void;
 }
 
-export function ResultStep({ uploadedImage, sareeId, drapingStyle, measurements, onStartOver }: ResultStepProps) {
+export function ResultStep({ uploadedImage, sareeId, drapingStyle, measurements, poseData, onStartOver }: ResultStepProps) {
   const [liked, setLiked] = useState(false);
   
   const saree = sarees.find(s => s.id === sareeId);
