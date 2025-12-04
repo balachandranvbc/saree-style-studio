@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles, User, Layers, Palette, CheckCircle } from 'lucide-react';
-import { DrapingStyle } from '@/types/tryon';
+import { DrapingStyle, Measurements } from '@/types/tryon';
 import { sarees, drapingStyles } from '@/data/sarees';
+import { TryOnScene } from './TryOnScene';
 
 interface ProcessingStepProps {
   onComplete: () => void;
   sareeId: string;
   drapingStyle: DrapingStyle;
+  measurements?: Measurements;
 }
 
 const processingSteps = [
@@ -18,9 +20,12 @@ const processingSteps = [
   { id: 'render', label: 'Rendering Final Image', icon: Palette, duration: 1500 }
 ];
 
-export function ProcessingStep({ onComplete, sareeId, drapingStyle }: ProcessingStepProps) {
+export function ProcessingStep({ onComplete, sareeId, drapingStyle, measurements }: ProcessingStepProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [showAvatar, setShowAvatar] = useState(false);
+  const [showSaree, setShowSaree] = useState(false);
+  const [sareeProgress, setSareeProgress] = useState(0);
 
   const saree = sarees.find(s => s.id === sareeId);
   const style = drapingStyles.find(s => s.id === drapingStyle);
@@ -32,6 +37,23 @@ export function ProcessingStep({ onComplete, sareeId, drapingStyle }: Processing
     processingSteps.forEach((step, index) => {
       const timeout = setTimeout(() => {
         setCurrentStep(index);
+        
+        // Show avatar when creating avatar step starts
+        if (index === 0) {
+          setTimeout(() => setShowAvatar(true), 500);
+        }
+        
+        // Start showing saree during physics simulation
+        if (index === 2) {
+          setShowSaree(true);
+          // Animate saree appearance
+          let sareeAnim = 0;
+          const sareeInterval = setInterval(() => {
+            sareeAnim += 0.05;
+            setSareeProgress(Math.min(sareeAnim, 1));
+            if (sareeAnim >= 1) clearInterval(sareeInterval);
+          }, 100);
+        }
       }, totalDuration);
       stepIntervals.push(timeout);
       totalDuration += step.duration;
@@ -64,9 +86,9 @@ export function ProcessingStep({ onComplete, sareeId, drapingStyle }: Processing
   return (
     <section className="min-h-[calc(100vh-5rem)] py-12 flex items-center">
       <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2 text-primary text-sm font-medium mb-4">
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">4</span>
               Processing
@@ -75,95 +97,131 @@ export function ProcessingStep({ onComplete, sareeId, drapingStyle }: Processing
               Creating Your Virtual Try-On
             </h1>
             <p className="text-muted-foreground text-lg">
-              Our AI is generating your personalized saree experience
+              Our AI is generating your personalized 3D saree draping
             </p>
           </div>
 
-          {/* Processing Card */}
-          <Card variant="gold" className="overflow-hidden">
-            <CardContent className="p-8">
-              {/* Selection Summary */}
-              <div className="flex items-center justify-center gap-6 mb-8 pb-6 border-b border-border">
-                <div className="text-center">
-                  <div 
-                    className="w-16 h-16 rounded-xl mx-auto mb-2"
-                    style={{ backgroundColor: saree?.color }}
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* 3D Preview */}
+            <Card variant="gold" className="overflow-hidden">
+              <CardContent className="p-0">
+                <div className="aspect-[3/4] bg-gradient-to-br from-background via-muted/20 to-background relative">
+                  <TryOnScene
+                    sareeColor={saree?.color || '#8B0000'}
+                    drapingStyle={drapingStyle}
+                    measurements={measurements}
+                    progress={sareeProgress}
+                    showAvatar={showAvatar}
+                    showSaree={showSaree}
+                    interactive={false}
                   />
-                  <p className="text-sm text-foreground font-medium">{saree?.name}</p>
-                </div>
-                <div className="text-2xl text-muted-foreground">+</div>
-                <div className="text-center">
-                  <div className="w-16 h-16 rounded-xl bg-secondary/20 flex items-center justify-center mx-auto mb-2">
-                    <Sparkles className="w-8 h-8 text-secondary" />
+                  
+                  {/* Overlay labels */}
+                  <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-md rounded-lg px-3 py-2">
+                    <span className="text-sm font-medium text-primary">3D Preview</span>
                   </div>
-                  <p className="text-sm text-foreground font-medium">{style?.name}</p>
-                </div>
-              </div>
-
-              {/* Progress */}
-              <div className="mb-8">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Processing...</span>
-                  <span className="text-primary font-medium">{Math.round(progress)}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-
-              {/* Steps */}
-              <div className="space-y-4">
-                {processingSteps.map((step, index) => {
-                  const isActive = currentStep === index;
-                  const isComplete = currentStep > index;
-                  const Icon = step.icon;
-
-                  return (
-                    <div 
-                      key={step.id}
-                      className={`
-                        flex items-center gap-4 p-4 rounded-xl transition-all duration-300
-                        ${isActive ? 'bg-primary/10 border border-primary/30' : ''}
-                        ${isComplete ? 'opacity-60' : ''}
-                      `}
-                    >
-                      <div className={`
-                        w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300
-                        ${isComplete 
-                          ? 'bg-green-500' 
-                          : isActive 
-                            ? 'bg-primary animate-pulse' 
-                            : 'bg-muted'
-                        }
-                      `}>
-                        {isComplete ? (
-                          <CheckCircle className="w-6 h-6 text-primary-foreground" />
-                        ) : (
-                          <Icon className={`w-6 h-6 ${isActive ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className={`font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          {step.label}
-                        </p>
-                        {isActive && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                            <span className="text-primary text-sm">In progress...</span>
-                          </div>
-                        )}
+                  
+                  {currentStep >= 2 && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-card/80 backdrop-blur-md rounded-lg px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{style?.name} Draping</p>
+                          <p className="text-xs text-muted-foreground">{style?.pleats} pleats • {style?.palluPosition}</p>
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Fun facts */}
-          <div className="mt-8 text-center">
-            <p className="text-muted-foreground text-sm">
-              <span className="text-primary font-medium">Did you know?</span>{' '}
-              Our physics engine simulates over 10,000 cloth particles to achieve realistic draping.
-            </p>
+            {/* Processing Steps */}
+            <Card variant="elevated" className="overflow-hidden">
+              <CardContent className="p-6">
+                {/* Selection Summary */}
+                <div className="flex items-center justify-center gap-6 mb-6 pb-6 border-b border-border">
+                  <div className="text-center">
+                    <div 
+                      className="w-14 h-14 rounded-xl mx-auto mb-2"
+                      style={{ backgroundColor: saree?.color }}
+                    />
+                    <p className="text-sm text-foreground font-medium">{saree?.name}</p>
+                  </div>
+                  <div className="text-xl text-muted-foreground">+</div>
+                  <div className="text-center">
+                    <div className="w-14 h-14 rounded-xl bg-secondary/20 flex items-center justify-center mx-auto mb-2">
+                      <Sparkles className="w-6 h-6 text-secondary" />
+                    </div>
+                    <p className="text-sm text-foreground font-medium">{style?.name}</p>
+                  </div>
+                </div>
+
+                {/* Progress */}
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Processing...</span>
+                    <span className="text-primary font-medium">{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
+
+                {/* Steps */}
+                <div className="space-y-3">
+                  {processingSteps.map((step, index) => {
+                    const isActive = currentStep === index;
+                    const isComplete = currentStep > index;
+                    const Icon = step.icon;
+
+                    return (
+                      <div 
+                        key={step.id}
+                        className={`
+                          flex items-center gap-3 p-3 rounded-lg transition-all duration-300
+                          ${isActive ? 'bg-primary/10 border border-primary/30' : ''}
+                          ${isComplete ? 'opacity-60' : ''}
+                        `}
+                      >
+                        <div className={`
+                          w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300
+                          ${isComplete 
+                            ? 'bg-green-500' 
+                            : isActive 
+                              ? 'bg-primary animate-pulse' 
+                              : 'bg-muted'
+                          }
+                        `}>
+                          {isComplete ? (
+                            <CheckCircle className="w-5 h-5 text-primary-foreground" />
+                          ) : (
+                            <Icon className={`w-5 h-5 ${isActive ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            {step.label}
+                          </p>
+                          {isActive && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                              <span className="text-primary text-xs">In progress...</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Physics info */}
+                <div className="mt-6 pt-4 border-t border-border">
+                  <p className="text-muted-foreground text-xs text-center">
+                    <span className="text-primary font-medium">Physics Engine:</span>{' '}
+                    Simulating 10,000+ cloth particles with {saree?.fabricType} properties
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
