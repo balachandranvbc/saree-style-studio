@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Sparkles, User, Layers, Palette, CheckCircle } from 'lucide-react';
 import { DrapingStyle, Measurements, PoseData } from '@/types/tryon';
 import { sarees, drapingStyles } from '@/data/sarees';
-import { TryOnScene } from './TryOnScene';
+import { RealtimeDrapeView } from './RealtimeDrapeView';
 
 interface ProcessingStepProps {
   onComplete: () => void;
@@ -12,6 +12,7 @@ interface ProcessingStepProps {
   drapingStyle: DrapingStyle;
   measurements?: Measurements;
   poseData?: PoseData;
+  uploadedImage?: string | null;
 }
 
 const processingSteps = [
@@ -21,7 +22,7 @@ const processingSteps = [
   { id: 'render', label: 'Rendering Final Image', icon: Palette, duration: 1500 }
 ];
 
-export function ProcessingStep({ onComplete, sareeId, drapingStyle, measurements, poseData }: ProcessingStepProps) {
+export function ProcessingStep({ onComplete, sareeId, drapingStyle, measurements, poseData, uploadedImage }: ProcessingStepProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [showAvatar, setShowAvatar] = useState(false);
@@ -107,15 +108,20 @@ export function ProcessingStep({ onComplete, sareeId, drapingStyle, measurements
             <Card variant="gold" className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="aspect-[3/4] bg-gradient-to-br from-background via-muted/20 to-background relative">
-                  <TryOnScene
-                    sareeColor={saree?.color || '#8B0000'}
-                    drapingStyle={drapingStyle}
-                    measurements={measurements}
-                    progress={sareeProgress}
-                    showAvatar={showAvatar}
-                    showSaree={showSaree}
-                    interactive={false}
-                  />
+                  {uploadedImage ? (
+                    <RealtimeDrapeView
+                      uploadedImage={uploadedImage}
+                      sareeColor={saree?.color || '#8B0000'}
+                      drapingStyle={drapingStyle}
+                      measurements={measurements}
+                      poseData={poseData}
+                      interactive={false}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      Processing...
+                    </div>
+                  )}
                   
                   {/* Overlay labels */}
                   <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-md rounded-lg px-3 py-2">

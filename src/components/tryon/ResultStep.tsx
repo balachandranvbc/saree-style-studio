@@ -11,11 +11,11 @@ import {
   CheckCircle,
   Palette,
   Ruler,
-  RotateCw
+  Move
 } from 'lucide-react';
 import { DrapingStyle, Measurements, PoseData } from '@/types/tryon';
 import { sarees, drapingStyles } from '@/data/sarees';
-import { TryOnScene } from './TryOnScene';
+import { RealtimeDrapeView } from './RealtimeDrapeView';
 
 interface ResultStepProps {
   uploadedImage: string | null;
@@ -60,16 +60,21 @@ export function ResultStep({ uploadedImage, sareeId, drapingStyle, measurements,
               <Card variant="gold" className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="aspect-[3/4] relative overflow-hidden bg-gradient-to-br from-background via-muted/10 to-background">
-                    {/* 3D Scene */}
-                    <TryOnScene
-                      sareeColor={saree?.color || '#8B0000'}
-                      drapingStyle={drapingStyle}
-                      measurements={measurements}
-                      progress={1}
-                      showAvatar={true}
-                      showSaree={true}
-                      interactive={true}
-                    />
+                    {/* Realtime Drape on Image */}
+                    {uploadedImage ? (
+                      <RealtimeDrapeView
+                        uploadedImage={uploadedImage}
+                        sareeColor={saree?.color || '#8B0000'}
+                        drapingStyle={drapingStyle}
+                        measurements={measurements}
+                        poseData={poseData}
+                        interactive={true}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        No image uploaded
+                      </div>
+                    )}
                     
                     {/* Overlay with results info */}
                     <div className="absolute bottom-6 left-6 right-6 bg-card/90 backdrop-blur-md rounded-xl p-4">
@@ -91,13 +96,13 @@ export function ResultStep({ uploadedImage, sareeId, drapingStyle, measurements,
 
                     {/* Style badge */}
                     <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-md rounded-lg px-3 py-2">
-                      <span className="text-sm font-medium text-primary">{style?.name}</span>
+                      <span className="text-sm font-medium text-primary">{style?.name} Style</span>
                     </div>
                     
                     {/* Interaction hint */}
                     <div className="absolute top-4 right-16 bg-card/80 backdrop-blur-md rounded-lg px-3 py-2 flex items-center gap-2">
-                      <RotateCw className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">Drag to rotate</span>
+                      <Move className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Use sliders to adjust</span>
                     </div>
 
                     {/* Like button */}

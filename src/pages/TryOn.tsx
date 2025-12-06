@@ -85,6 +85,7 @@ const TryOn = () => {
             drapingStyle={selectedDrapingStyle}
             measurements={measurements || undefined}
             poseData={poseData || undefined}
+            uploadedImage={uploadedImage}
           />
         );
       case 'result':
