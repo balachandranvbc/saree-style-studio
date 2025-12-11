@@ -16,7 +16,7 @@ interface SareeDrape3DProps {
   };
 }
 
-// Draping style configurations
+// Draping style configurations - all 10 styles
 const styleConfigs: Record<DrapingStyle, {
   pleats: number;
   palluSide: 'left' | 'right';
@@ -29,6 +29,10 @@ const styleConfigs: Record<DrapingStyle, {
   maharashtrian: { pleats: 9, palluSide: 'left', wrapDirection: 1, palluLength: 0.5 },
   tamil: { pleats: 8, palluSide: 'right', wrapDirection: -1, palluLength: 0.7 },
   kerala: { pleats: 4, palluSide: 'left', wrapDirection: 1, palluLength: 0.6 },
+  lehenga: { pleats: 12, palluSide: 'left', wrapDirection: 1, palluLength: 1.2 },
+  hyderabadi: { pleats: 6, palluSide: 'left', wrapDirection: 1, palluLength: 0.95 },
+  coorgi: { pleats: 5, palluSide: 'right', wrapDirection: -1, palluLength: 0.7 },
+  bengali_lalpaar: { pleats: 0, palluSide: 'right', wrapDirection: -1, palluLength: 1.0 },
 };
 
 export function SareeDrape3D({ color, drapingStyle, progress, measurements }: SareeDrape3DProps) {

@@ -5,29 +5,108 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Detailed prompts for each draping style - accurate real-world descriptions
 const DRAPING_STYLE_PROMPTS: Record<string, string> = {
-  nivi: "Nivi style draping - the most common style with pleats tucked at the waist center, pallu draped over the left shoulder",
-  bengali: "Bengali style draping - pleats tucked at the front right side, pallu brought from behind over the right shoulder, with signature key-hole style front drape",
-  gujarati: "Gujarati style draping - pallu is draped from the back over the right shoulder to the front, with pleats at the back",
-  tamil_nadu: "Tamil Nadu/Madurai style draping - saree is pleated at the front like Nivi but the pallu is longer and draped around the waist again before going over shoulder",
-  kerala: "Kerala Kasavu style - white/cream saree with golden border, pallu tucked at the waist and draped over the left shoulder, very simple and elegant",
-  modern_lehenga: "Modern lehenga style draping - saree worn like a lehenga with pre-stitched pleats and pallu pinned at shoulder, giving a contemporary look",
-  maharashtrian: "Maharashtrian Nauvari style - 9-yard saree draped like dhoti pants, with fabric pulled between legs and tucked at back"
+  nivi: `NIVI STYLE (Modern/Andhra Pradesh):
+- Pleats (5-7) tucked at the waist CENTER, fanning outward
+- Pallu draped diagonally from right hip, across body, over LEFT shoulder
+- Pallu falls at back reaching just below hip level
+- Front pleats should be crisp and evenly spaced
+- Blouse paired with matching or contrasting color`,
+
+  bengali: `BENGALI STYLE (Kolkata/West Bengal):
+- NO FRONT PLEATS at all - this is the key difference
+- Saree wrapped around body starting from left
+- Pallu brought from BACK over RIGHT shoulder (signature key-hole style)
+- Creates a distinctive front drape with the pallu showing prominently
+- A portion of pallu hangs at the front in a decorative loop (the "key")
+- Often paired with red-bordered white saree (Lal Paar) for festivals`,
+
+  gujarati: `GUJARATI SEEDHA PALLU STYLE:
+- Pleats tucked at LEFT side of waist (not center)
+- Pallu comes from BACK, over RIGHT shoulder, and falls to the FRONT
+- Pallu displayed prominently in front showing all the work/design
+- The pallu end is tucked or pinned at right shoulder
+- Creates a diagonal line across the torso
+- Perfect for showing off designer pallu work`,
+
+  tamil: `TAMIL NADU MADISAR STYLE (Traditional Brahmin):
+- Complex wrap using 9-yard saree
+- Creates V-shaped drape at the front
+- Fabric is wrapped between legs (like dhoti) from back
+- Front pleats are tucked slightly to the right
+- Multiple folds create layered appearance
+- Pallu goes over RIGHT shoulder and wraps around
+- Very structured, for religious ceremonies`,
+
+  kerala: `KERALA KASAVU STYLE (Mundum Neriyathum):
+- Traditional TWO-PIECE style (mundu + neriyathu)
+- Base: White/cream with GOLDEN (kasavu) border
+- Extremely simple, minimal pleating (2-4 pleats)
+- Lower portion wrapped like lungi
+- Upper portion (neriyathu) draped over left shoulder
+- Golden border creates the signature look
+- Very clean, elegant, modest draping`,
+
+  maharashtrian: `MAHARASHTRIAN NAUVARI STYLE (9-yard):
+- DHOTI-STYLE wrapping - fabric passed between legs
+- Creates pants-like lower draping
+- Pleats tucked at BACK (not front)
+- Very practical for movement and dance
+- Pallu wrapped around waist and tucked
+- Often worn with traditional jewelry (nath, green bangles)
+- Power pose - shows strength and tradition`,
+
+  lehenga: `LEHENGA STYLE SAREE (Modern/Bridal):
+- Pre-stitched or heavily pleated circular pleats (10-15 pleats)
+- Creates lehenga-like flare at the bottom
+- Pleats sewn/stitched to fall in circles like a skirt
+- Pallu PINNED at shoulder with decorative brooch
+- Pallu spread out beautifully showing all embroidery
+- Often has can-can underneath for volume
+- Popular for weddings and receptions`,
+
+  hyderabadi: `HYDERABADI KHADA DUPATTA STYLE:
+- Royal Nawabi style from Hyderabad
+- Standing vertical pleats in front
+- Pallu worn like a DUPATTA over both shoulders
+- Creates regal, dignified appearance
+- Often paired with heavy jewelry
+- Pallu edges visible on both sides
+- Perfect for formal events`,
+
+  coorgi: `COORGI STYLE (Karnataka/Kodagu):
+- Unique BACK-PLEATED style
+- All pleats are at the BACK, not front
+- Creates smooth front appearance
+- Pallu wrapped TIGHTLY around right shoulder
+- Very secure draping for active work
+- Traditional for Kodava community
+- Often worn with distinctive Coorgi jewelry`,
+
+  bengali_lalpaar: `BENGALI LAL PAAR STYLE (Festive):
+- Same as Bengali style BUT with specific colors
+- WHITE base saree with RED (lal) border (paar)
+- Worn specifically during Durga Puja
+- Signature married woman's look in Bengal
+- Red sindoor, red alta on feet complement the look
+- Pallu key-hole style over right shoulder
+- Symbol of Bengali cultural identity`
 };
 
+// Detailed fabric descriptions for realistic rendering
 const FABRIC_DESCRIPTIONS: Record<string, string> = {
-  silk: "luxurious pure silk with natural sheen and rich texture, heavy fall and smooth drape",
-  cotton: "soft handloom cotton with matte finish, light and breathable with natural texture",
-  organza: "sheer transparent organza with crisp finish, delicate and flowy",
-  georgette: "flowing georgette with subtle crepe texture, elegant drape and movement",
-  chiffon: "lightweight sheer chiffon, extremely soft with graceful flow",
-  banarasi: "heavy Banarasi brocade silk with intricate gold/silver zari work and motifs",
-  kanjivaram: "rich Kanjivaram silk with heavy golden border and traditional temple motifs",
-  chanderi: "delicate Chanderi fabric with subtle sheen, lightweight with fine texture"
+  silk: "pure mulberry silk with natural luminous sheen, medium-heavy weight with elegant drape, smooth texture with subtle luster that catches light beautifully",
+  cotton: "soft handwoven cotton with natural matte finish, breathable and lightweight, shows natural texture and slight irregularities of handloom",
+  organza: "sheer transparent organza with crisp finish, extremely lightweight, holds shape well, slightly stiff with glass-like transparency",
+  georgette: "flowing pure georgette with subtle crepe texture, lightweight with beautiful movement, slightly grainy surface, elegant drape",
+  chiffon: "ultra-lightweight sheer chiffon, extremely soft and floaty, translucent with graceful flow and movement",
+  banarasi: "heavy Banarasi brocade silk with intricate gold/silver metallic zari weaving, rich texture with raised patterns, luxurious weight",
+  kanjivaram: "premium Kanjivaram silk with distinctive thick gold zari border, heavy weight with stiff drape, shows temple motifs and traditional designs",
+  chanderi: "delicate Chanderi silk-cotton blend with subtle golden sheen, lightweight with fine texture, traditional buttis (small motifs)"
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -58,44 +137,62 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Build the detailed prompt for saree draping
     const styleDescription = DRAPING_STYLE_PROMPTS[drapingStyle] || DRAPING_STYLE_PROMPTS.nivi;
     const fabricDescription = FABRIC_DESCRIPTIONS[fabric] || FABRIC_DESCRIPTIONS.silk;
 
-    const drapingPrompt = `You are an expert at virtual fashion try-on, specifically for Indian sarees. 
+    // Enhanced photorealistic prompt
+    const drapingPrompt = `You are an expert fashion photographer and virtual stylist specializing in Indian sarees.
 
-TASK: Drape a beautiful saree on the person in this image while keeping their face, pose, body proportions, and the original photo's lighting perfectly intact.
+**CRITICAL TASK**: Dress the person in this photo with a beautiful saree while maintaining PERFECT photorealism. The result must look like an actual photograph, not AI-generated.
 
-SAREE SPECIFICATIONS:
-- Primary Color: ${sareeColor || 'deep maroon red'}
-${secondaryColor ? `- Secondary/Border Color: ${secondaryColor}` : ''}
-- Fabric: ${fabricDescription}
-- Draping Style: ${styleDescription}
-${borderStyle ? `- Border Style: ${borderStyle}` : ''}
-${pattern ? `- Pattern/Design: ${pattern}` : ''}
+**SAREE SPECIFICATIONS**:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Primary Color: ${sareeColor || '#8B0000'} (ensure exact color match)
+${secondaryColor ? `Secondary/Border Color: ${secondaryColor}` : 'Border: Gold zari'}
+Fabric: ${fabricDescription}
+${borderStyle ? `Border Design: ${borderStyle}` : ''}
+${pattern ? `Pattern/Motifs: ${pattern}` : ''}
 
-DRAPING REQUIREMENTS:
-1. The saree MUST look like real cloth with natural physics - proper folds, pleats, tension, and draping
-2. Match the lighting, shadows, and color temperature of the original photo exactly
-3. Show realistic fabric texture and sheen appropriate for ${fabric || 'silk'}
-4. The pleats should have natural depth and shadow
-5. The pallu should flow naturally according to the ${drapingStyle} style
-6. Add subtle fabric movement where appropriate (like at pallu edges)
-7. Ensure the saree fits the body proportions naturally - not too tight, not floating
-8. Keep the person's face, hair, jewelry (if any), and background completely unchanged
-9. The blouse should complement the saree color and be appropriate for the style
+**DRAPING STYLE - FOLLOW EXACTLY**:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${styleDescription}
 
-${measurements ? `BODY MEASUREMENTS for fit reference:
-- Shoulder width: ${measurements.shoulderWidth}cm
+**CLOTH PHYSICS REQUIREMENTS**:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. REALISTIC FOLDS: Natural fabric folds at waist, pleats, and pallu
+2. WEIGHT: Show proper gravity - heavier at bottom, flowing at top
+3. TENSION: Fabric tension at shoulder and waist anchor points
+4. DRAPE: Natural drape following body contours
+5. SHADOWS: Self-shadowing in folds and pleats
+6. HIGHLIGHTS: Fabric sheen appropriate for ${fabric || 'silk'}
+7. MOVEMENT: Slight natural movement in pallu edges
+
+**BODY FIT REQUIREMENTS**:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Blouse: Well-fitted, matching/complementary color
+- Waist: Saree sits naturally at waist level
+- Pleats: Fall naturally from waist to feet
+- Pallu: Proper length and spread for the style
+${measurements ? `
+MEASUREMENTS FOR FIT:
 - Height: ${measurements.height}cm
-- Bust: ${measurements.bust}cm
+- Shoulder Width: ${measurements.shoulderWidth}cm
+- Bust: ${measurements.bust}cm  
 - Waist: ${measurements.waist}cm
 - Hips: ${measurements.hips}cm` : ''}
 
-${poseData ? `POSE INFORMATION:
-The person's pose has been detected. Ensure the saree draping follows the body contours naturally.` : ''}
+**PRESERVATION RULES**:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Keep face EXACTLY as original - no changes
+✓ Keep hair style and color unchanged
+✓ Keep background identical
+✓ Match original lighting perfectly
+✓ Match skin tone and complexion
+✓ Preserve any existing jewelry if present
+✓ Keep pose and posture unchanged
 
-OUTPUT: Generate a photorealistic image of the person wearing the saree. The result should look like a professional fashion photograph, not an AI-generated image.`;
+**OUTPUT QUALITY**:
+Generate a PHOTOREALISTIC image indistinguishable from a real fashion photograph. Professional studio quality.`;
 
     console.log('Sending request to AI gateway for image generation...');
 
