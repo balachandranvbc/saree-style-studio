@@ -14,7 +14,212 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      draping_styles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          instructions: string | null
+          is_active: boolean | null
+          name: string
+          preview_image_url: string | null
+          region: string | null
+          style: Database["public"]["Enums"]["draping_style"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          name: string
+          preview_image_url?: string | null
+          region?: string | null
+          style: Database["public"]["Enums"]["draping_style"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          name?: string
+          preview_image_url?: string | null
+          region?: string | null
+          style?: Database["public"]["Enums"]["draping_style"]
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          body_measurements: Json | null
+          created_at: string
+          display_name: string | null
+          id: string
+          preferred_draping_style:
+            | Database["public"]["Enums"]["draping_style"]
+            | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          body_measurements?: Json | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          preferred_draping_style?:
+            | Database["public"]["Enums"]["draping_style"]
+            | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          body_measurements?: Json | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          preferred_draping_style?:
+            | Database["public"]["Enums"]["draping_style"]
+            | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sarees: {
+        Row: {
+          border_style: string | null
+          color: string
+          created_at: string
+          description: string | null
+          fabric: Database["public"]["Enums"]["fabric_type"]
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          pattern: string | null
+          price: number | null
+          secondary_color: string | null
+          texture_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          border_style?: string | null
+          color: string
+          created_at?: string
+          description?: string | null
+          fabric?: Database["public"]["Enums"]["fabric_type"]
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          pattern?: string | null
+          price?: number | null
+          secondary_color?: string | null
+          texture_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          border_style?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          fabric?: Database["public"]["Enums"]["fabric_type"]
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          pattern?: string | null
+          price?: number | null
+          secondary_color?: string | null
+          texture_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tryon_sessions: {
+        Row: {
+          body_analysis: Json | null
+          border_style: string | null
+          created_at: string
+          draping_style: Database["public"]["Enums"]["draping_style"]
+          error_message: string | null
+          fabric: Database["public"]["Enums"]["fabric_type"] | null
+          id: string
+          original_image_url: string
+          pallu_length: string | null
+          pleat_style: string | null
+          pose_data: Json | null
+          processed_image_url: string | null
+          processing_completed_at: string | null
+          processing_started_at: string | null
+          result_image_url: string | null
+          saree_color: string | null
+          saree_id: string | null
+          session_token: string
+          status: Database["public"]["Enums"]["processing_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          body_analysis?: Json | null
+          border_style?: string | null
+          created_at?: string
+          draping_style?: Database["public"]["Enums"]["draping_style"]
+          error_message?: string | null
+          fabric?: Database["public"]["Enums"]["fabric_type"] | null
+          id?: string
+          original_image_url: string
+          pallu_length?: string | null
+          pleat_style?: string | null
+          pose_data?: Json | null
+          processed_image_url?: string | null
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          result_image_url?: string | null
+          saree_color?: string | null
+          saree_id?: string | null
+          session_token?: string
+          status?: Database["public"]["Enums"]["processing_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          body_analysis?: Json | null
+          border_style?: string | null
+          created_at?: string
+          draping_style?: Database["public"]["Enums"]["draping_style"]
+          error_message?: string | null
+          fabric?: Database["public"]["Enums"]["fabric_type"] | null
+          id?: string
+          original_image_url?: string
+          pallu_length?: string | null
+          pleat_style?: string | null
+          pose_data?: Json | null
+          processed_image_url?: string | null
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          result_image_url?: string | null
+          saree_color?: string | null
+          saree_id?: string | null
+          session_token?: string
+          status?: Database["public"]["Enums"]["processing_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tryon_sessions_saree_id_fkey"
+            columns: ["saree_id"]
+            isOneToOne: false
+            referencedRelation: "sarees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +228,31 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      draping_style:
+        | "bengali"
+        | "gujarati"
+        | "tamil_nadu"
+        | "kerala"
+        | "modern_lehenga"
+        | "nivi"
+        | "maharashtrian"
+      fabric_type:
+        | "silk"
+        | "cotton"
+        | "organza"
+        | "georgette"
+        | "chiffon"
+        | "banarasi"
+        | "kanjivaram"
+        | "chanderi"
+      processing_status:
+        | "pending"
+        | "analyzing"
+        | "generating_avatar"
+        | "draping"
+        | "rendering"
+        | "completed"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +379,35 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      draping_style: [
+        "bengali",
+        "gujarati",
+        "tamil_nadu",
+        "kerala",
+        "modern_lehenga",
+        "nivi",
+        "maharashtrian",
+      ],
+      fabric_type: [
+        "silk",
+        "cotton",
+        "organza",
+        "georgette",
+        "chiffon",
+        "banarasi",
+        "kanjivaram",
+        "chanderi",
+      ],
+      processing_status: [
+        "pending",
+        "analyzing",
+        "generating_avatar",
+        "draping",
+        "rendering",
+        "completed",
+        "failed",
+      ],
+    },
   },
 } as const
