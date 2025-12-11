@@ -30,14 +30,27 @@ export interface PoseData {
 export interface Saree {
   id: string;
   name: string;
+  subtitle?: string;
   color: string;
+  secondaryColor?: string;
   fabricType: FabricType;
-  image: string;
+  image?: string;
   price: number;
   description: string;
+  borderStyle?: string;
+  pattern?: string;
 }
 
-export type FabricType = 'silk' | 'cotton' | 'georgette' | 'chiffon' | 'crepe';
+export type FabricType = 
+  | 'silk' 
+  | 'cotton' 
+  | 'georgette' 
+  | 'chiffon' 
+  | 'crepe'
+  | 'organza'
+  | 'banarasi'
+  | 'kanjivaram'
+  | 'chanderi';
 
 export type DrapingStyle = 
   | 'nivi'
@@ -45,7 +58,11 @@ export type DrapingStyle =
   | 'gujarati'
   | 'maharashtrian'
   | 'tamil'
-  | 'kerala';
+  | 'kerala'
+  | 'lehenga'
+  | 'hyderabadi'
+  | 'coorgi'
+  | 'bengali_lalpaar';
 
 export interface DrapingStyleInfo {
   id: DrapingStyle;
@@ -54,6 +71,8 @@ export interface DrapingStyleInfo {
   description: string;
   pleats: number;
   palluPosition: string;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  occasion?: string;
 }
 
 export interface ProcessingState {
@@ -69,4 +88,20 @@ export interface TryOnResult {
   drapingStyle: DrapingStyle;
   accuracy: number;
   timestamp: Date;
+}
+
+// 3D Avatar types for future Ready Player Me integration
+export interface Avatar3DConfig {
+  modelUrl?: string;
+  textureUrl?: string;
+  rigType: 'full-body' | 'half-body';
+  lod: 'high' | 'medium' | 'low';
+}
+
+export interface ClothSimulationConfig {
+  fabricWeight: number;
+  stiffness: number;
+  drapeCoefficient: number;
+  collisionMargin: number;
+  gravity: number;
 }
