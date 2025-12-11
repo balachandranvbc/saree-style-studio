@@ -17,6 +17,7 @@ const TryOn = () => {
   const [measurements, setMeasurements] = useState<Measurements | null>(null);
   const [selectedSareeId, setSelectedSareeId] = useState<string | null>(null);
   const [selectedDrapingStyle, setSelectedDrapingStyle] = useState<DrapingStyle>('nivi');
+  const [resultImage, setResultImage] = useState<string | null>(null);
 
   const handleImageUpload = (imageUrl: string, detectedPose?: PoseData) => {
     setUploadedImage(imageUrl);
@@ -45,7 +46,8 @@ const TryOn = () => {
     setCurrentStep('processing');
   };
 
-  const handleProcessingComplete = () => {
+  const handleProcessingComplete = (generatedImage: string) => {
+    setResultImage(generatedImage);
     setCurrentStep('result');
   };
 
@@ -55,6 +57,7 @@ const TryOn = () => {
     setPoseData(null);
     setMeasurements(null);
     setSelectedSareeId(null);
+    setResultImage(null);
   };
 
   const renderStep = () => {
@@ -92,6 +95,7 @@ const TryOn = () => {
         return (
           <ResultStep 
             uploadedImage={uploadedImage}
+            resultImage={resultImage}
             sareeId={selectedSareeId!}
             drapingStyle={selectedDrapingStyle}
             measurements={measurements || undefined}

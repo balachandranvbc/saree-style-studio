@@ -1,1 +1,4 @@
 project_id = "vbsnyrxlnphcmtwbuwdq"
+
+[functions.drape-saree]
+verify_jwt = false
