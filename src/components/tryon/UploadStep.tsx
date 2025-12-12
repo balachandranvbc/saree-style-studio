@@ -102,13 +102,13 @@ export function UploadStep({ onImageUpload }: UploadStepProps) {
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2 text-primary text-sm font-medium mb-4">
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</span>
-              Step 1 of 4
+              Step 1 of 5
             </div>
             <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
               Upload Your Photo
             </h1>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Our AI will analyze your photo using MediaPipe to detect your pose and create a precise 3D avatar
+              Our AI will convert your photo into a 3D depth model for realistic saree draping
             </p>
           </div>
 
